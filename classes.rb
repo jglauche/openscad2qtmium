@@ -63,11 +63,20 @@ end
 
 
 class Primitive < Code
-	attr_accessor :type, :center
+	attr_accessor :type, :center, :x, :y, :z, :radius
+end
+
+class Sphere < Primitive
+	def initialize(radius)
+		@radius = radius
+	end
+
+	def to_py
+		ret = add_tab("Sphere(#{radius})")	
+	end
 end
 
 class Cube < Primitive
-	attr_accessor :x, :y, :z
 	def initialize(x,y,z,level,center=false)
 		@x = x
 		@y = y

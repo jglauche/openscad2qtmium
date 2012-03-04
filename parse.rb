@@ -7,7 +7,7 @@ f = File.read(ARGV[0]);
 res = f.gsub("\n","").gsub("\r","").gsub("\t","")
 # make an array by ; to split out the code; 
 # add ; before and after { and } to get them seperated too
-res = res.gsub("{",";{;").gsub("}",";};").split(";")
+res = res.gsub("{",";{;").gsub("}",";};").gsub("//","#").split(";")
 res.delete("") # remove emtpy lines
 
 
@@ -82,7 +82,14 @@ def parse_code(elements,level=0)
 		end
 
 		if element[0..3] == "cube"
-			x,y,z = element[element.index("[")+1..element.index("]")-1].split(",")
+			if element.index("[") == nil
+				# assume one parameter is given only
+				val = element[element.index("(")+1..element.index(",")-1].to_i
+				x,y,z= [val,val,val]			
+			else
+				x,y,z = element[element.index("[")+1..element.index("]")-1].split(",")
+			end
+
 			if element.gsub(" ","").include?("center=true")
 				center = true
 			else
@@ -93,7 +100,11 @@ def parse_code(elements,level=0)
 			next
 		end
 
-		
+		if element[0..5] == "sphere"
+#			obj= eval element.capitalize		
+#			obj.level = level
+#			code << obj		
+		end
 
 
 		code << element
@@ -109,10 +120,14 @@ code = ""
 parse_code(tree).each{|l| 
 		
 	if l.respond_to?("to_py")
-	   code << l.to_py
-	   code << "\n"
+	    code << l.to_py
+	    code << "\n"
 	else
-	   code << l
+ 	    if l.kind_of?(Array)
+	    	puts l.inspect
+		else
+		    code << l		
+		end
 	end
 }
 
