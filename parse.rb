@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+require "classes"
+
 f = File.read(ARGV[0]);
 # remove formatting
 res = f.gsub("\n","").gsub("\r","").gsub("\t","")
@@ -38,7 +40,7 @@ def parse_req(code, level = 0)
 		if elem == "{"			
 			inside_code, skip_until = find_code_inbetween(code[i+1..-1])			
 			elements << parse_req(inside_code, level+1)
-			puts elements.inspect			
+#			puts elements.inspect			
 			next
 		end
 		if elem == "}"
@@ -50,25 +52,33 @@ def parse_req(code, level = 0)
 	return elements			
 end
 
+def parse_code(elements)
+	code = []
+	skip_until = -1
+	
+	elements.each_with_index do |element, i| 
+		if i <= skip_until
+			next	
+		end		
+			
+		if element[0..5] == "module"
+			skip_until = i+1
+			code << Def.new(element[7..1].strip.gsub("(","").gsub(")",""), elements[i+1])
+			next
+		end
+
+
+		code << element
+	end
+
+
+	return code	
+end
+
 tree = parse_req(res)
-puts tree.inspect
-
-#	if element[0..5] == "module"
-#		elements << Def.new(element[7..1].strip.gsub("(","").gsub(")",""), level)
-#	end
+code = parse_code(tree)
 
 
-#class Code
-#	attr_accessor :code
-#	def initialize(code)
-#		 @code = code	
-#	end
-#end
+puts code.inspect
 
-#class Def < Code
-#	attr_accessor :name
-#	
-#	def initialize(name, level)
-#		@name = name	
-#	end
-#end
+
